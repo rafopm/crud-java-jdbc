@@ -1,6 +1,6 @@
 package com.alura.controlstock.dao;
 
-import com.alura.controlstock.conexion.ConexionMySQL;
+import com.alura.controlstock.conexion.ConnectionFactory;
 import com.alura.controlstock.model.Producto;
 
 import java.sql.Connection;
@@ -11,10 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProductoDao {
-    private ConexionMySQL fabricaConexion;
+    private ConnectionFactory fabricaConexion;
 
     public ProductoDao() {
-        this.fabricaConexion = new ConexionMySQL();
+        this.fabricaConexion = new ConnectionFactory();
     }
 
     public boolean registrar(Producto producto) throws SQLException {
@@ -23,10 +23,10 @@ public class ProductoDao {
 
         String SQL = "INSERT INTO producto(nombre, descripcion, cantidad) values(?,?,?)";
 
-        Connection con = this.fabricaConexion.getConnection();
+        final Connection con = this.fabricaConexion.recuperaConexion();
         //PreparedStatement evita inyección de código
         final PreparedStatement sentencia = con.prepareStatement(SQL);
-        try (sentencia) {
+        try (con; sentencia) {
             //Tomamos el control de la transacción con setAutoCommit
             con.setAutoCommit(false);
             sentencia.setString(1, producto.getNombre());
@@ -59,12 +59,12 @@ public class ProductoDao {
     }
 
     public List<Producto> listar() throws SQLException {
-        Connection con = this.fabricaConexion.getConnection();
         String SQL = "SELECT * FROM producto;";
+        final Connection con = this.fabricaConexion.recuperaConexion();
         final PreparedStatement sentencia = con.prepareStatement(SQL);
         final ResultSet data = sentencia.executeQuery();
 
-        try (sentencia; data) {
+        try (con; sentencia; data) {
             List<Producto> listaProductos = new ArrayList<>();
             while (data.next()) {
                 Producto producto = new Producto();
@@ -78,13 +78,15 @@ public class ProductoDao {
         } catch (SQLException e) {
             throw new RuntimeException("Error al eliminar el producto", e);
         }
+
     }
 
     public boolean editar(Producto producto) throws SQLException {
-        Connection con = this.fabricaConexion.getConnection();
+
         String SQL = "UPDATE producto set nombre=?, descripcion=?, cantidad=? WHERE id=?";
+        final Connection con = this.fabricaConexion.recuperaConexion();
         final PreparedStatement sentencia = con.prepareStatement(SQL);
-        try (sentencia) {
+        try (con; sentencia) {
             sentencia.setString(1, producto.getNombre());
             sentencia.setString(2, producto.getDescripcion());
             sentencia.setInt(3, producto.getCantidad());
@@ -98,9 +100,9 @@ public class ProductoDao {
 
     public boolean eliminar(int id) throws SQLException {
         String SQL = "DELETE from producto where id = ?";
-        Connection con = this.fabricaConexion.getConnection();
+        final Connection con = this.fabricaConexion.recuperaConexion();
         final PreparedStatement sentencia = con.prepareStatement(SQL);
-        try (sentencia) {
+        try (con; sentencia) {
             sentencia.setInt(1, id);
             int filasAfectadas = sentencia.executeUpdate();
             return filasAfectadas > 0;
