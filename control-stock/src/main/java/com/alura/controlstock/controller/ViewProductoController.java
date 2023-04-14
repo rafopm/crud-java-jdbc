@@ -111,7 +111,12 @@ public class ViewProductoController implements Initializable {
                 Optional<ButtonType> result = alert.showAndWait();
 
                 if(result.get() == ButtonType.OK){
-                    boolean rsp = productoDao.eliminar(productoEliminar.getId());
+                    boolean rsp = false;
+                    try {
+                        rsp = productoDao.eliminar(productoEliminar.getId());
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
 
                     if (rsp) {
                         Alert alert2 = new Alert(Alert.AlertType.INFORMATION);
