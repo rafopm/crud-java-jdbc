@@ -5,6 +5,7 @@ public class Producto {
     private String nombre;
     private String descripcion;
     private int cantidad;
+    private int categoria_id;
 
     public Producto() {
     }
@@ -41,6 +42,13 @@ public class Producto {
         this.cantidad = cantidad;
     }
 
+    public Integer getCategoria_id() {
+        return categoria_id;
+    }
+
+    public void setCategoria_id(int categoria_id) {
+        this.categoria_id = categoria_id;
+    }
 
     @Override
     public String toString() {
@@ -49,6 +57,7 @@ public class Producto {
         sb.append(", nombre='").append(nombre).append('\'');
         sb.append(", descripcion='").append(descripcion).append('\'');
         sb.append(", cantidad=").append(cantidad);
+        sb.append(", categoria_id=").append(categoria_id);
         sb.append('}');
         return sb.toString();
     }
